@@ -10,23 +10,14 @@ import (
 func TestCountdown(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	mockSleeper := &MockSleeper{}
-	elapsed := RunAndMeasureTime(buffer, mockSleeper) // should NOT be any delays
-
-	if math.Round(elapsed) != 0.0 {
-		t.Error("the runtime of method is not correct, not equal to 0")
-	}
-
+	RunAndMeasureTime(t, buffer, mockSleeper, 0.0) // should NOT be any delays
 	CompareStrings(t, buffer)
 }
 
 func TestRealCountdown(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	realSleeper := &RealSleeper{}
-	elapsed := RunAndMeasureTime(buffer, realSleeper) // should be 1 second delays. in total 3 second
-
-	if math.Round(elapsed) != 3.0 {
-		t.Error("the runtime of method is not correct, not equal to 3")
-	}
+	RunAndMeasureTime(t, buffer, realSleeper, 3.0) // should be 1 second delays. in total 3 second
 
 	CompareStrings(t, buffer)
 }
@@ -40,10 +31,12 @@ func CompareStrings(t *testing.T, buffer *bytes.Buffer) {
 	}
 }
 
-func RunAndMeasureTime(buffer *bytes.Buffer, sleeper Sleeper) float64 {
+func RunAndMeasureTime(t *testing.T, buffer *bytes.Buffer, sleeper Sleeper, expectedRuntime float64) {
 	start := time.Now()
 	Countdown(buffer, sleeper)
 	elapsed := time.Since(start)
 
-	return elapsed.Seconds()
+	if math.Round(elapsed.Seconds()) != expectedRuntime {
+		t.Error("the runtime of method is not correct, not equal to 3")
+	}
 }
